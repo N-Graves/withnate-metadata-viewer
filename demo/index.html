@@ -4,13 +4,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Metadata viewer — demo</title>
-    <!--
-      Development harness AND the integration contract. The markup inside
-      [data-mv] is what the site's page module needs to emit.
-      demo.css only stands in for the site's own classes; it is not shipped.
-    -->
+
     <link rel="stylesheet" href="demo.css" />
     <link rel="stylesheet" href="../dist/metadata-viewer.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Photo metadata viewer and remover",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any modern browser",
+        "browserRequirements": "Requires JavaScript",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" },
+        "featureList": [
+          "Whether a photo carries GPS coordinates, and where they point",
+          "Camera, lens, serial number, software and timestamps",
+          "Whether an embedded preview of the original uncropped frame is present",
+          "Removing all of it losslessly, with the picture copied across untouched"
+        ],
+        "permissions": "None. The file is read in the browser and never uploaded."
+      }
+    </script>
   </head>
   <body>
     <main class="wrap">

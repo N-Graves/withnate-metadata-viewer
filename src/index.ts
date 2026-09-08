@@ -1,20 +1,8 @@
-/**
- * Metadata viewer - entry point.
- *
- * Leads with the finding rather than the table. The important tag is almost
- * always the same one and almost nobody knows it is there.
- *
- * Nothing is uploaded and nothing is stored, which matters more here than
- * anywhere else in this set: uploading a file to find out whether it discloses
- * your home address would rather defeat the point.
- */
-
 import {
   attachIntake,
   measureImage,
   mount,
   parseExif,
-  readHeaderBytes,
   type ExifData,
 } from "@nasdigitaluk/withnate-tool-core";
 import { buildReport, describeValue, reportToText, type Report } from "./report.js";
@@ -137,8 +125,7 @@ mount("[data-mv]", ({ root }) => {
     onFile: (file) => {
       if (errorOut) errorOut.textContent = "";
       void (async () => {
-        // The whole file, not just the header: stripping needs every byte, and
-        // metadata can sit anywhere before the image data.
+
         const bytes = new Uint8Array(await file.arrayBuffer());
         const measured = measureImage(bytes);
         if (!measured) {
@@ -172,13 +159,17 @@ mount("[data-mv]", ({ root }) => {
         if (actions) actions.hidden = false;
         if (copyBtn) copyBtn.hidden = report.tagCount === 0;
 
-        // Stripping
         if (stripLink && stripNote) {
           const support = stripSupportFor(bytes);
           const stripped = support === "lossless" ? stripMetadata(bytes) : null;
           if (stripped && stripped.removed.length > 0) {
             if (objectUrl) URL.revokeObjectURL(objectUrl);
-            objectUrl = URL.createObjectURL(new Blob([stripped.bytes.slice()], { type: file.type }));
+
+            objectUrl = URL.createObjectURL(
+              new Blob([stripped.bytes], {
+                type: measured.format === "png" ? "image/png" : "image/jpeg",
+              }),
+            );
             stripLink.href = objectUrl;
             stripLink.download = file.name.replace(/(\.[^.]+)?$/, "-clean$1");
             stripLink.hidden = false;
@@ -199,8 +190,7 @@ mount("[data-mv]", ({ root }) => {
     void navigator.clipboard?.writeText(currentText).then(
       () => {
         copyBtn.textContent = "Copied";
-        // Restored rather than left, so the button does not permanently read
-        // as though a copy is still in progress.
+
         setTimeout(() => {
           copyBtn.textContent = "Copy everything";
         }, 1600);

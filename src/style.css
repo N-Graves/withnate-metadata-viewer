@@ -1,0 +1,157 @@
+/*
+ * Metadata viewer styles. Namespaced .mv- so this drops into the site without
+ * touching anything already there; it does not define .btn, .glass, .eyebrow
+ * or .vh, which belong to the site's own stylesheet.
+ */
+
+.mv-intake {
+  border: 2px dashed var(--line, rgba(51, 23, 11, 0.22));
+  border-radius: 16px;
+  padding: clamp(1.25rem, 5vw, 2.25rem);
+  text-align: center;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.mv-intake.is-dragging {
+  border-color: var(--accent, #832305);
+  background: var(--surface-2, #f6ead8);
+}
+
+.mv-error:empty { display: none; }
+
+.mv-error {
+  margin: 0.9rem 0 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--accent, #832305);
+  color: var(--accent, #832305);
+  font-size: 0.92rem;
+}
+
+.mv-alert {
+  margin: 1.5rem 0 0;
+  padding: 1.2rem 1.35rem;
+  border-radius: 16px;
+  border-left: 4px solid var(--line, rgba(51, 23, 11, 0.2));
+}
+
+/* The one finding that genuinely warrants raising your voice. */
+.mv-alert-strong {
+  border-left-color: var(--accent, #832305);
+}
+
+.mv-alert h2 {
+  font-family: var(--f-display, system-ui, sans-serif);
+  font-size: clamp(1.3rem, 3.5vw, 1.9rem);
+  margin: 0.25rem 0 0.5rem;
+}
+
+.mv-coords {
+  font-family: var(--f-hud, ui-monospace, monospace);
+  font-size: 1.05rem;
+  margin: 0.2rem 0;
+  /* Coordinates are for copying, so make selecting them easy. */
+  user-select: all;
+}
+
+.mv-decimal {
+  font-size: 0.9rem;
+  color: var(--text-dim, #6b4230);
+}
+
+.mv-groups {
+  display: grid;
+  gap: 1.1rem;
+  margin: 1.5rem 0 0;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.mv-group {
+  padding: 0.9rem 1.05rem;
+  border: 1px solid var(--line, rgba(51, 23, 11, 0.14));
+  border-radius: 12px;
+  background: var(--surface-2, #f6ead8);
+}
+
+.mv-group-h {
+  font-family: var(--f-hud, ui-monospace, monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint, #7d5a46);
+  margin: 0 0 0.6rem;
+}
+
+.mv-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.8fr) 1fr;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--line-soft, rgba(51, 23, 11, 0.08));
+  font-size: 0.92rem;
+}
+
+.mv-k { color: var(--text-dim, #6b4230); }
+.mv-v { word-break: break-word; }
+
+/* Marked with a rule rather than colour alone, so the distinction survives
+   for anyone who cannot see the difference. */
+.mv-sensitive .mv-v {
+  border-left: 3px solid var(--accent, #832305);
+  padding-left: 0.5rem;
+}
+
+.mv-raw {
+  margin: 1.5rem 0 0;
+}
+
+.mv-raw summary {
+  cursor: pointer;
+  font-family: var(--f-hud, ui-monospace, monospace);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint, #7d5a46);
+}
+
+/* A ninety-row table must scroll inside its own box; the page never scrolls sideways. */
+.mv-raw-wrap {
+  overflow-x: auto;
+  max-height: 24rem;
+  overflow-y: auto;
+  margin-top: 0.75rem;
+}
+
+.mv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--f-hud, ui-monospace, monospace);
+  font-size: 0.8rem;
+}
+
+.mv-table th,
+.mv-table td {
+  text-align: left;
+  padding: 0.35rem 0.75rem 0.35rem 0;
+  border-bottom: 1px solid var(--line-soft, rgba(51, 23, 11, 0.08));
+  vertical-align: top;
+}
+
+.mv-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  margin: 1.5rem 0 0;
+}
+
+.mv-note {
+  color: var(--text-dim, #6b4230);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  margin: 0.4rem 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-intake { transition: none; }
+}

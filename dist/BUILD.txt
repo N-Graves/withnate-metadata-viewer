@@ -1,0 +1,8 @@
+withnate-metadata-viewer v0.1.0
+js   32021 bytes
+css  3161 bytes
+
+Drop both into the site's assets directory and reference them from the
+page. The script is a plain IIFE - no module, no defer requirement beyond
+the site's own convention. It does nothing unless the page contains an
+element with a data-pfc attribute.

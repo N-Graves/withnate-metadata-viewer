@@ -102,11 +102,52 @@ Plain IIFE, does nothing unless the page contains `data-mv`. Copy `dist/metadata
 
 The stylesheet defines only `.mv-` classes, enforced by a smoke check.
 
+## Structured data
+
+`demo/index.html` carries a static JSON-LD `WebApplication` block. Verified against the site's own
+tooling rather than assumed: `scripts/check.mjs` fails a page with a second inline `<script>` but
+**explicitly exempts `type="application/ld+json"`**, and `scripts/seo.mjs` fails the build on a block
+that does not parse or carries no `@type`. No rating, no review count.
+
+## Security posture
+
+Nothing is uploaded, stored or transmitted — which for a tool that exists to show people what their
+photos are leaking is the only architecture that would be honest. Beyond that:
+
+- **The download's MIME type comes from the sniffed bytes, never from `file.type`.** That field is
+  whatever the file claimed to be, and a `blob:` URL inherits this page's origin — so letting an
+  uploaded file name its own type is a route to a same-origin document rendered from bytes somebody
+  else chose. Confirmed in a browser: a file declaring `text/html` still produces an `image/jpeg`
+  blob.
+- **Everything is `createElement` and `textContent`.** No `innerHTML` anywhere. This matters more
+  here than in the other tools, because **every value on the page comes out of the file** — an Exif
+  Artist or Software field is attacker-controlled text, and it is rendered as text throughout.
+- The parser itself is the shared core's, which caps entry counts, component counts and block size,
+  and treats every offset in an Exif block as attacker-chosen.
+- **No byte cap on the intake, and that is a decision rather than an omission.** This tool genuinely
+  needs the whole file — it is byte surgery on the container — and the largest print master in this
+  business is 292MB. The change that makes those tractable is that the strip no longer accumulates
+  bytes one at a time (see below); the working set is now about twice the file rather than several
+  times it.
+
+## The strip no longer copies byte by byte
+
+Both strippers built their output by pushing individual bytes into a JavaScript array and converting
+at the end. A JPEG's entropy-coded scan is nearly the whole file, so that cost several times the
+file in memory before the result existed — on a 292MB master, ruinously.
+
+They now collect the ranges to keep and copy them once with `Uint8Array.set`. **Proven in a browser
+rather than assumed:** a real 1,414,723-byte photo strips to 1,414,516 bytes, and **1,410,898 bytes
+of scan data from `SOS` to the end are byte-for-byte identical.** The surviving markers are APP2 (the
+ICC profile), APP14 (Adobe's colour transform), the quantisation and Huffman tables and the frame —
+so the two segments whose removal would visibly change the picture both came through, while APP1 and
+APP13 went.
+
 ## Testing
 
 ```bash
 npm run lint    # tsc --noEmit
-npm test        # 16 tests
+npm test        # 20 tests
 npm run smoke   # 20 checks against the built bundle
 npm run demo    # serves demo/ on :4176
 ```

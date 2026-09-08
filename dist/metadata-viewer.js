@@ -661,9 +661,19 @@
     237: "Photoshop / IPTC block (author, caption)",
     254: "Embedded comment"
   };
-  var JPEG_KEEP = /* @__PURE__ */ new Set([224, 226]);
+  var assemble = (bytes, keep) => {
+    let total = 0;
+    for (const [s, e] of keep) total += e - s;
+    const out = new Uint8Array(total);
+    let at2 = 0;
+    for (const [s, e] of keep) {
+      out.set(bytes.subarray(s, e), at2);
+      at2 += e - s;
+    }
+    return out;
+  };
   var stripJpeg = (bytes) => {
-    const out = [255, 216];
+    const keep = [[0, 2]];
     const removed = [];
     let p = 2;
     while (p + 4 <= bytes.length) {
@@ -673,7 +683,7 @@
       }
       const marker = bytes[p + 1];
       if (marker === 216 || marker >= 208 && marker <= 217 || marker === 1) {
-        out.push(255, marker);
+        keep.push([p, p + 2]);
         p += 2;
         continue;
       }
@@ -681,19 +691,20 @@
       if (len < 2) break;
       const end = p + 2 + len;
       if (marker === 218) {
-        for (let i = p; i < bytes.length; i += 1) out.push(bytes[i]);
+        keep.push([p, bytes.length]);
         p = bytes.length;
         break;
       }
       const label = JPEG_STRIP[marker];
-      if (label !== void 0 && !JPEG_KEEP.has(marker)) {
+      if (label !== void 0) {
         if (!removed.includes(label)) removed.push(label);
       } else {
-        for (let i = p; i < Math.min(end, bytes.length); i += 1) out.push(bytes[i]);
+        keep.push([p, Math.min(end, bytes.length)]);
       }
       p = end;
     }
-    return { bytes: new Uint8Array(out), removed, bytesSaved: bytes.length - out.length };
+    const out = assemble(bytes, keep);
+    return { bytes: out, removed, bytesSaved: bytes.length - out.length };
   };
   var PNG_STRIP = {
     tEXt: "Text comments",
@@ -704,9 +715,8 @@
   };
   var be323 = (b, i) => (b[i] << 24 | b[i + 1] << 16 | b[i + 2] << 8 | b[i + 3]) >>> 0;
   var stripPng = (bytes) => {
-    const out = [];
+    const keep = [[0, 8]];
     const removed = [];
-    for (let i = 0; i < 8; i += 1) out.push(bytes[i]);
     let p = 8;
     while (p + 8 <= bytes.length) {
       const len = be323(bytes, p);
@@ -717,12 +727,13 @@
       if (label !== void 0) {
         if (!removed.includes(label)) removed.push(label);
       } else {
-        for (let i = p; i < Math.min(p + total, bytes.length); i += 1) out.push(bytes[i]);
+        keep.push([p, Math.min(p + total, bytes.length)]);
       }
       p += total;
       if (name === "IEND") break;
     }
-    return { bytes: new Uint8Array(out), removed, bytesSaved: bytes.length - out.length };
+    const out = assemble(bytes, keep);
+    return { bytes: out, removed, bytesSaved: bytes.length - out.length };
   };
   var stripSupportFor = (bytes) => {
     if (bytes.length > 3 && bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) return "lossless";
@@ -877,7 +888,11 @@
             const stripped = support === "lossless" ? stripMetadata(bytes) : null;
             if (stripped && stripped.removed.length > 0) {
               if (objectUrl) URL.revokeObjectURL(objectUrl);
-              objectUrl = URL.createObjectURL(new Blob([stripped.bytes.slice()], { type: file.type }));
+              objectUrl = URL.createObjectURL(
+                new Blob([stripped.bytes], {
+                  type: measured.format === "png" ? "image/png" : "image/jpeg"
+                })
+              );
               stripLink.href = objectUrl;
               stripLink.download = file.name.replace(/(\.[^.]+)?$/, "-clean$1");
               stripLink.hidden = false;

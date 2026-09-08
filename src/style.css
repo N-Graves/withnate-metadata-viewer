@@ -1,9 +1,3 @@
-/*
- * Metadata viewer styles. Namespaced .mv- so this drops into the site without
- * touching anything already there; it does not define .btn, .glass, .eyebrow
- * or .vh, which belong to the site's own stylesheet.
- */
-
 .mv-intake {
   border: 2px dashed var(--line, rgba(51, 23, 11, 0.22));
   border-radius: 16px;
@@ -35,7 +29,6 @@
   border-left: 4px solid var(--line, rgba(51, 23, 11, 0.2));
 }
 
-/* The one finding that genuinely warrants raising your voice. */
 .mv-alert-strong {
   border-left-color: var(--accent, #832305);
 }
@@ -50,7 +43,7 @@
   font-family: var(--f-hud, ui-monospace, monospace);
   font-size: 1.05rem;
   margin: 0.2rem 0;
-  /* Coordinates are for copying, so make selecting them easy. */
+
   user-select: all;
 }
 
@@ -94,8 +87,6 @@
 .mv-k { color: var(--text-dim, #6b4230); }
 .mv-v { word-break: break-word; }
 
-/* Marked with a rule rather than colour alone, so the distinction survives
-   for anyone who cannot see the difference. */
 .mv-sensitive .mv-v {
   border-left: 3px solid var(--accent, #832305);
   padding-left: 0.5rem;
@@ -114,7 +105,6 @@
   color: var(--text-faint, #7d5a46);
 }
 
-/* A ninety-row table must scroll inside its own box; the page never scrolls sideways. */
 .mv-raw-wrap {
   overflow-x: auto;
   max-height: 24rem;

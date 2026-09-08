@@ -1,15 +1,3 @@
-/**
- * Turning tags into something worth reading.
- *
- * Most Exif viewers print ninety rows and leave you to spot the important one.
- * The important one is almost always the same, and almost nobody knows it is
- * there: a photograph taken at home carries the address to within a few
- * metres. So this leads with what was found and what it means, and puts the
- * full table underneath for anyone who wants it.
- *
- * Pure. Takes parsed Exif, returns structured findings.
- */
-
 import {
   exifGps,
   exifNumber,
@@ -21,7 +9,7 @@ import {
 export interface Finding {
   label: string;
   value: string;
-  /** Identifies a person, a device or a place, rather than describing the picture. */
+
   sensitive?: boolean;
 }
 
@@ -33,19 +21,18 @@ export interface Group {
 export interface Location {
   latitude: number;
   longitude: number;
-  /** Degrees, minutes, seconds, the way a map would write it. */
+
   text: string;
 }
 
 export interface Report {
   location: Location | null;
-  /** An embedded preview, which can hold an EARLIER crop of the picture. */
+
   hasThumbnail: boolean;
   groups: Group[];
   tagCount: number;
 }
 
-// image IFD
 const MAKE = 0x010f;
 const MODEL = 0x0110;
 const ORIENTATION = 0x0112;
@@ -53,7 +40,7 @@ const SOFTWARE = 0x0131;
 const DATE_TIME = 0x0132;
 const ARTIST = 0x013b;
 const COPYRIGHT = 0x8298;
-// exif IFD
+
 const EXPOSURE_TIME = 0x829a;
 const F_NUMBER = 0x829d;
 const ISO = 0x8827;
@@ -64,7 +51,7 @@ const LENS_MODEL = 0xa434;
 const BODY_SERIAL = 0xa431;
 const PIXEL_X = 0xa002;
 const PIXEL_Y = 0xa003;
-// thumbnail IFD
+
 const THUMBNAIL_OFFSET = 0x0201;
 
 const ORIENTATIONS: Record<number, string> = {
@@ -78,11 +65,9 @@ const ORIENTATIONS: Record<number, string> = {
   8: "Rotated 90° anticlockwise",
 };
 
-/** `1/250 s` rather than `0.004`, because that is what it says on a camera. */
 const formatExposure = (seconds: number): string =>
   seconds >= 1 ? `${Math.round(seconds * 10) / 10} s` : `1/${Math.round(1 / seconds)} s`;
 
-/** `2024:03:17 14:22:08` is the Exif format and reads badly. */
 const formatDateTime = (raw: string): string => {
   const m = /^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/.exec(raw);
   if (!m) return raw;
@@ -117,8 +102,7 @@ export const buildReport = (data: ExifData | null): Report => {
   push(camera, "Camera make", exifString(data, "image", MAKE));
   push(camera, "Camera model", exifString(data, "image", MODEL));
   push(camera, "Lens", exifString(data, "exif", LENS_MODEL));
-  // A serial number is the strongest identifier in the whole block: it ties
-  // every photograph from that body together, across accounts and years.
+
   push(camera, "Body serial number", exifString(data, "exif", BODY_SERIAL), true);
   push(camera, "Software", exifString(data, "image", SOFTWARE));
 
@@ -129,8 +113,7 @@ export const buildReport = (data: ExifData | null): Report => {
     ["File modified", "image", DATE_TIME],
   ] as const) {
     const raw = exifString(data, ifd, tag);
-    // Timestamps are sensitive in aggregate rather than alone - a run of them
-    // is a record of where somebody was and when.
+
     if (raw) push(when, label, formatDateTime(raw), true);
   }
 
@@ -171,7 +154,6 @@ export const buildReport = (data: ExifData | null): Report => {
   };
 };
 
-/** Everything, as plain text, for the copy button. */
 export const reportToText = (report: Report, entries: ExifEntry[]): string => {
   const lines: string[] = [];
   if (report.location) {

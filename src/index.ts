@@ -1,5 +1,6 @@
 import {
   attachIntake,
+  h,
   measureImage,
   mount,
   parseExif,
@@ -7,20 +8,6 @@ import {
 } from "@nasdigitaluk/withnate-tool-core";
 import { buildReport, describeValue, reportToText, type Report } from "./report.js";
 import { stripMetadata, stripSupportFor } from "./strip.js";
-
-type Attrs = Record<string, string | boolean | number>;
-
-const h = (tag: string, attrs: Attrs = {}, ...kids: Array<Node | string | null>): HTMLElement => {
-  const n = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (v === false) continue;
-    if (k === "class") n.className = String(v);
-    else if (v === true) n.setAttribute(k, "");
-    else n.setAttribute(k, String(v));
-  }
-  for (const c of kids) if (c !== null) n.append(typeof c === "string" ? document.createTextNode(c) : c);
-  return n;
-};
 
 const headline = (report: Report, hasAny: boolean): HTMLElement => {
   if (report.location) {

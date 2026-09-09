@@ -59,6 +59,20 @@
   var MM_PER_INCH = 25.4;
   var CM_PER_INCH = MM_PER_INCH / 10;
   var MM_PER_METRE = 1e3;
+  var roundTo = (value, dp) => {
+    const f = 10 ** dp;
+    return Math.round(value * f) / f;
+  };
+  var formatBytes = (n) => {
+    if (!Number.isFinite(n) || n < 0)
+      return "\u2014";
+    if (n < 1e3)
+      return `${Math.round(n)} B`;
+    const kb = Math.round(n / 1e3);
+    if (kb < 1e3)
+      return `${kb} KB`;
+    return `${roundTo(n / 1e6, 1)} MB`;
+  };
 
   // node_modules/@nasdigitaluk/withnate-tool-core/dist/exif.js
   var TYPE_SIZE = [0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8];
@@ -422,7 +436,6 @@
 
   // node_modules/@nasdigitaluk/withnate-tool-core/dist/intake.js
   var DEFAULT_DRAGGING_CLASS = "is-dragging";
-  var humanBytes = (n) => n >= 1024 * 1024 ? `${Math.round(n / (1024 * 1024))}MB` : `${Math.round(n / 1024)}KB`;
   var attachIntake = (root, opts) => {
     const draggingClass = opts.draggingClass ?? DEFAULT_DRAGGING_CLASS;
     const input = root.querySelector('input[type="file"]');
@@ -430,7 +443,7 @@
       if (!file)
         return;
       if (opts.maxBytes && file.size > opts.maxBytes) {
-        opts.onReject?.(`That file is ${humanBytes(file.size)}. The limit here is ${humanBytes(opts.maxBytes)}.`);
+        opts.onReject?.(`That file is ${formatBytes(file.size)}. The limit here is ${formatBytes(opts.maxBytes)}.`);
         return;
       }
       if (file.size === 0) {

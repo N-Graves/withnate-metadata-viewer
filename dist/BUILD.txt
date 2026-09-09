@@ -1,5 +1,5 @@
 withnate-metadata-viewer v0.1.0
-js   32065 bytes
+js   32320 bytes
 css  3161 bytes
 
 Drop both into the site's assets directory and reference them from the
